@@ -4,9 +4,9 @@ from pydantic import BaseModel, ConfigDict
 
 
 class PatientBase(BaseModel):
-    cd_patiente: str
-    nm_patiente: str
-    ds_endereco: str
+    cd_patient: str
+    nm_patient: str
+    ds_address: str
 
 
 class PatientCreate(PatientBase):
@@ -14,8 +14,8 @@ class PatientCreate(PatientBase):
 
 
 class PatientUpdate(BaseModel):
-    nm_patiente: str | None = None
-    ds_endereco: str | None = None
+    nm_patient: str | None = None
+    ds_address: str | None = None
 
 
 class PatientResponse(PatientBase):

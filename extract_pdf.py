@@ -1,7 +1,10 @@
-import pdfplumber
-import pandas as pd
-from pathlib import Path
 import re
+from pathlib import Path
+
+import pandas as pd
+import pdfplumber
+
+from core import logger
 
 
 def clean_currency_value(value: str) -> float:
@@ -109,14 +112,14 @@ def extract_from_pdf(pdf_path: str) -> pd.DataFrame:
     all_data = []
     
     with pdfplumber.open(pdf_path) as pdf:
-        print(f"📄 Processando PDF com {len(pdf.pages)} páginas...\n")
+        logger.info(f"Processando PDF com {len(pdf.pages)} páginas...")
         
         for page_num, page in enumerate(pdf.pages, 1):
-            print(f"  Página {page_num}/{len(pdf.pages)}...", end=' ')
+            logger.debug(f"Processando página {page_num}/{len(pdf.pages)}...")
             
             text = page.extract_text()
             if not text:
-                print("⚠️  Sem texto")
+                logger.warning(f"Página {page_num}: sem texto")
                 continue
             
             lines = text.split('\n')
@@ -128,71 +131,71 @@ def extract_from_pdf(pdf_path: str) -> pd.DataFrame:
                     all_data.append(data)
                     records_found += 1
             
-            print(f"✓ {records_found} registros")
+            logger.info(f"Página {page_num}: {records_found} registros")
     
     if all_data:
         df = pd.DataFrame(all_data)
-        print(f"\n✅ Total de registros extraídos: {len(df)}\n")
+        logger.success(f"Total de registros extraídos: {len(df)}")
         return df
     else:
-        print("\n❌ Nenhum dado foi extraído\n")
+        logger.warning("Nenhum dado foi extraído")
         return pd.DataFrame()
 
 
 def generate_summary(df: pd.DataFrame):
     """Gera resumo estatístico."""
-    print("="*70)
-    print("📊 RESUMO DOS DADOS EXTRAÍDOS")
-    print("="*70)
-    
-    print(f"\n📝 Total de registros: {len(df)}")
-    
+    logger.info("=" * 70)
+    logger.info("RESUMO DOS DADOS EXTRAÍDOS")
+    logger.info("=" * 70)
+
+    logger.info(f"Total de registros: {len(df)}")
+
     if len(df) > 0:
-        print(f"\n💰 Estatísticas Financeiras:")  # noqa: F541
-        print(f"   Valor total liberado: R$ {df['valor_liberado'].sum():,.2f}")
-        print(f"   Valor médio por atendimento: R$ {df['valor_liberado'].mean():,.2f}")
-        print(f"   Valor mínimo: R$ {df['valor_liberado'].min():,.2f}")
-        print(f"   Valor máximo: R$ {df['valor_liberado'].max():,.2f}")
-        
-        print(f"\n📅 Período:")  # noqa: F541
+        logger.info("Estatísticas Financeiras:")
+        logger.info(f"   Valor total liberado: R$ {df['valor_liberado'].sum():,.2f}")
+        logger.info(f"   Valor médio por atendimento: R$ {df['valor_liberado'].mean():,.2f}")
+        logger.info(f"   Valor mínimo: R$ {df['valor_liberado'].min():,.2f}")
+        logger.info(f"   Valor máximo: R$ {df['valor_liberado'].max():,.2f}")
+
+        logger.info("Período:")
         if not df['data_atendimento'].empty:
             datas = pd.to_datetime(df['data_atendimento'], format='%d/%m/%Y', errors='coerce')
             if not datas.isna().all():
-                print(f"   Primeira data: {datas.min().strftime('%d/%m/%Y')}")
-                print(f"   Última data: {datas.max().strftime('%d/%m/%Y')}")
-        
-        print(f"\n👥 Pacientes:")  # noqa: F541
-        print(f"   Total de pacientes únicos: {df['nome_usuario'].nunique()}")
-        
-        print(f"\n🏥 Procedimentos:")  # noqa: F541
-        print(f"   Total de tipos de procedimentos: {df['procedimento'].nunique()}")
-        print(f"   Total de procedimentos realizados: {df['quantidade'].sum()}")
-        
-        print(f"\n🔝 Top 10 Procedimentos mais realizados:")  # noqa: F541
+                logger.info(f"   Primeira data: {datas.min().strftime('%d/%m/%Y')}")
+                logger.info(f"   Última data: {datas.max().strftime('%d/%m/%Y')}")
+
+        logger.info("Pacientes:")
+        logger.info(f"   Total de pacientes únicos: {df['nome_usuario'].nunique()}")
+
+        logger.info("Procedimentos:")
+        logger.info(f"   Total de tipos de procedimentos: {df['procedimento'].nunique()}")
+        logger.info(f"   Total de procedimentos realizados: {df['quantidade'].sum()}")
+
+        logger.info("Top 10 Procedimentos mais realizados:")
         top_procedures = df.groupby('procedimento').agg({
             'quantidade': 'sum',
             'valor_liberado': 'sum'
         }).sort_values('quantidade', ascending=False).head(10)
-        
+
         for i, (proc, row) in enumerate(top_procedures.iterrows(), 1):
             proc_short = proc[:60] + '...' if len(proc) > 60 else proc
-            print(f"   {i:2d}. {proc_short:<63} | {int(row['quantidade']):3d}x | R$ {row['valor_liberado']:>10,.2f}")
-        
-        print(f"\n💵 Top 10 Procedimentos por valor total:")  # noqa: F541
+            logger.info(f"   {i:2d}. {proc_short:<63} | {int(row['quantidade']):3d}x | R$ {row['valor_liberado']:>10,.2f}")
+
+        logger.info("Top 10 Procedimentos por valor total:")
         top_values = df.groupby('procedimento').agg({
             'quantidade': 'sum',
             'valor_liberado': 'sum'
         }).sort_values('valor_liberado', ascending=False).head(10)
-        
+
         for i, (proc, row) in enumerate(top_values.iterrows(), 1):
             proc_short = proc[:60] + '...' if len(proc) > 60 else proc
-            print(f"   {i:2d}. {proc_short:<63} | {int(row['quantidade']):3d}x | R$ {row['valor_liberado']:>10,.2f}")
-        
-        print(f"\n👨‍⚕️ Top 10 Pacientes por valor de atendimento:")  # noqa: F541
+            logger.info(f"   {i:2d}. {proc_short:<63} | {int(row['quantidade']):3d}x | R$ {row['valor_liberado']:>10,.2f}")
+
+        logger.info("Top 10 Pacientes por valor de atendimento:")
         top_patients = df.groupby('nome_usuario')['valor_liberado'].sum().sort_values(ascending=False).head(10)
         for i, (patient, value) in enumerate(top_patients.items(), 1):
             patient_short = patient[:50] + '...' if len(patient) > 50 else patient
-            print(f"   {i:2d}. {patient_short:<53} | R$ {value:>10,.2f}")
+            logger.info(f"   {i:2d}. {patient_short:<53} | R$ {value:>10,.2f}")
 
 
 def save_to_excel(df: pd.DataFrame, output_path: str):
@@ -217,13 +220,13 @@ def save_to_excel(df: pd.DataFrame, output_path: str):
         for col, width in column_widths.items():
             worksheet.column_dimensions[col].width = width
     
-    print(f"💾 Arquivo Excel salvo: {output_path}")
+    logger.success(f"Arquivo Excel salvo: {output_path}")
 
 
 def save_to_csv(df: pd.DataFrame, output_path: str):
     """Salva em CSV."""
     df.to_csv(output_path, index=False, encoding='utf-8-sig', sep=';')
-    print(f"💾 Arquivo CSV salvo: {output_path}")
+    logger.success(f"Arquivo CSV salvo: {output_path}")
 
 
 def main():
@@ -231,9 +234,9 @@ def main():
     pdf_path = "./data/98663RELATORIO_ATENDIMENTO_01_2026.pdf"
     output_dir = Path("./data")
     
-    print("="*70)
-    print("🔬 EXTRAÇÃO DE DADOS - RELATÓRIO DE ATENDIMENTOS PDF")
-    print("="*70 + "\n")
+    logger.info("=" * 70)
+    logger.info("EXTRAÇÃO DE DADOS - RELATÓRIO DE ATENDIMENTOS PDF")
+    logger.info("=" * 70)
     
     # Extrai dados
     df = extract_from_pdf(pdf_path)
@@ -243,9 +246,9 @@ def main():
         generate_summary(df)
         
         # Salva arquivos
-        print("\n" + "="*70)
-        print("💾 SALVANDO ARQUIVOS")
-        print("="*70 + "\n")
+        logger.info("=" * 70)
+        logger.info("SALVANDO ARQUIVOS")
+        logger.info("=" * 70)
         
         excel_path = output_dir / "relatorio_atendimentos_extraido.xlsx"
         csv_path = output_dir / "relatorio_atendimentos_extraido.csv"
@@ -254,17 +257,17 @@ def main():
         save_to_csv(df, str(csv_path))
         
         # Estatísticas finais
-        print(f"\n📊 Estatísticas Gerais:")  # noqa: F541
-        print(f"   • {len(df)} registros em {df['pagina_pdf'].nunique()} páginas")
-        print(f"   • {df['nome_usuario'].nunique()} pacientes únicos")
-        print(f"   • {df['procedimento'].nunique()} tipos de procedimentos")
-        print(f"   • R$ {df['valor_liberado'].sum():,.2f} em valores liberados")
-        
-        print("\n" + "="*70)
-        print("✅ EXTRAÇÃO CONCLUÍDA COM SUCESSO!")
-        print("="*70 + "\n")
+        logger.info("Estatísticas Gerais:")
+        logger.info(f"   {len(df)} registros em {df['pagina_pdf'].nunique()} páginas")
+        logger.info(f"   {df['nome_usuario'].nunique()} pacientes únicos")
+        logger.info(f"   {df['procedimento'].nunique()} tipos de procedimentos")
+        logger.info(f"   R$ {df['valor_liberado'].sum():,.2f} em valores liberados")
+
+        logger.info("=" * 70)
+        logger.success("EXTRAÇÃO CONCLUÍDA COM SUCESSO!")
+        logger.info("=" * 70)
     else:
-        print("\n❌ Não foi possível extrair dados do PDF.\n")
+        logger.error("Não foi possível extrair dados do PDF.")
 
 
 if __name__ == "__main__":

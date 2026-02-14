@@ -1,26 +1,42 @@
 from collections.abc import Generator
 
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, Engine
 from sqlalchemy.orm import Session, sessionmaker
 
 from core.settings import settings
-from models import Base
 
 
-engine = create_engine(settings.database_url, echo=False)
-SessionLocal = sessionmaker(bind=engine, autocommit=False, autoflush=False)
+class Database:
+    """Singleton for database engine and session factory."""
+
+    _instance: "Database | None" = None
+    _engine: Engine | None = None
+    _session_factory: sessionmaker[Session] | None = None
+
+    def __new__(cls) -> "Database":
+        if cls._instance is None:
+            cls._instance = super().__new__(cls)
+            cls._engine = create_engine(settings.database_url, echo=False)
+            cls._session_factory = sessionmaker(
+                bind=cls._engine, autocommit=False, autoflush=False
+            )
+        return cls._instance
+
+    @property
+    def engine(self) -> Engine:
+        return self._engine
+
+    @property
+    def session_factory(self) -> sessionmaker[Session]:
+        return self._session_factory
+
+    def get_session(self) -> Generator[Session, None, None]:
+        """Yields a database session and closes it after use."""
+        session = self._session_factory()
+        try:
+            yield session
+        finally:
+            session.close()
 
 
-def get_session() -> Generator[Session, None, None]:
-    """Dependency to get a database session."""
-    session = SessionLocal()
-    try:
-        yield session
-    finally:
-        session.close()
-
-
-def create_tables() -> None:
-    """Creates all tables in the database."""
-    Base.metadata.create_all(bind=engine)
-    print("Tables created/verified successfully.")
+db = Database()

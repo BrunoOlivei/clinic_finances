@@ -1,4 +1,5 @@
 from models.base import Base
+from models.log import Log
 from models.patient import Patient
 
-__all__ = ["Base", "Patient"]
+__all__ = ["Base", "Log", "Patient"]
