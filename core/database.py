@@ -7,8 +7,6 @@ from core.settings import settings
 
 
 class Database:
-    """Singleton for database engine and session factory."""
-
     _instance: "Database | None" = None
     _engine: Engine | None = None
     _session_factory: sessionmaker[Session] | None = None
@@ -24,14 +22,22 @@ class Database:
 
     @property
     def engine(self) -> Engine:
+        """
+        Returns the SQLAlchemy engine instance.
+        """
         return self._engine
 
     @property
     def session_factory(self) -> sessionmaker[Session]:
+        """
+        Returns the SQLAlchemy session factory.
+        """
         return self._session_factory
 
     def get_session(self) -> Generator[Session, None, None]:
-        """Yields a database session and closes it after use."""
+        """
+        Yields a database session and closes it after use.
+        """
         session = self._session_factory()
         try:
             yield session

@@ -3,7 +3,6 @@
         "**/__pycache__": true,
         "**/*.pyc": true,
         ".venv": true,
-        ".vscode": true,
         "uv.lock": true
     },
     "search.exclude": {
