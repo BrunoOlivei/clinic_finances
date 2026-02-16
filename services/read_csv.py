@@ -56,7 +56,7 @@ class ReadCSV:
 
         try:
             logger.info(f"Reading CSV file: {csv_path}")
-            return pd.read_csv(csv_path, encoding="utf-8-sig")
+            return pd.read_csv(csv_path, encoding="utf-8-sig", dtype=str)
         except Exception as e:
             logger.error(f"Error reading CSV file: {e}")
             raise

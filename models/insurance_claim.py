@@ -18,14 +18,20 @@ class InsuranceClaim(Base):
         "comment": "Atendimentos realizados no período, importados da operadora São Lucas",
     }
 
+    id_claim: Mapped[str] = mapped_column(
+        String(36),
+        primary_key=True,
+        comment="ID único do atendimento concatenando número do atendimento, código do paciente e código do procedimento",
+    )
+
     nr_claim: Mapped[str] = mapped_column(
         String(8),
-        primary_key=True,
+        nullable=False,
         comment="Número do atendimento (guia)",
     )
     nr_request: Mapped[str] = mapped_column(
         String(8),
-        nullable=False,
+        nullable=True,
         comment="Número da solicitação",
     )
     cd_patient: Mapped[str] = mapped_column(

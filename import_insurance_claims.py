@@ -86,31 +86,85 @@ class IngestInsuranceClaims:
             pd.DataFrame: The sanitized DataFrame.
         """
         try:
-            claims_df["nr_request"] = claims_df[["nr_request"]].apply(
-                lambda x: (
-                    x.str.replace(r"\s+", " ", regex=True)
-                    .str.strip()
-                    .replace(r"Solicitacao: C", "", regex=True)
+            claims_df["nr_request"] = (
+                claims_df[["nr_request"]]
+                .apply(
+                    lambda x: (
+                        (
+                            str(x.values[0])
+                            .replace(r"\s+", " ")
+                            .strip()
+                            .replace("Solicitacao: C", "")
+                        )
+                        if pd.notna(x.values[0])
+                        else None
+                    ),
+                    axis=1,
                 )
+                .astype(str)
             )
-            claims_df["st_claim"] = claims_df[["st_claim"]].apply(
-                lambda x: x.str.replace(r"\s+", " ", regex=True).str.strip()
+
+            claims_df["cd_patient"] = (
+                claims_df[["cd_patient"]]
+                .apply(lambda x: x.str.replace(r"\s+", " ", regex=True).str.strip())
+                .astype(str)
             )
+
+            claims_df["st_claim"] = (
+                claims_df[["st_claim"]]
+                .apply(lambda x: x.str.replace(r"\s+", " ", regex=True).str.strip())
+                .astype(str)
+            )
+
             claims_df["tp_claim"] = claims_df[["tp_claim"]].apply(
                 lambda x: x.str.replace(r"\s+", " ", regex=True).str.strip()
             )
+
             claims_df["fg_return"] = claims_df[["fg_return"]].apply(
                 lambda x: (
                     x.str.replace(r"\s+", " ", regex=True).str.strip().str.lower()
                     == "sim"
                 )
             )
+            claims_df["cd_procedure"] = (
+                claims_df[["cd_procedure"]]
+                .apply(lambda x: x.str.replace(r"\s+", " ", regex=True).str.strip())
+                .astype(str)
+            )
+
             claims_df["nm_procedure"] = claims_df[["nm_procedure"]].apply(
                 lambda x: x.str.replace(r"\s+", " ", regex=True).str.strip()
+            )
+
+            claims_df["qt_procedure"] = claims_df[["qt_procedure"]].apply(
+                lambda x: pd.to_numeric(x, errors="coerce").fillna(0).astype(int)
             )
             return claims_df
         except Exception as e:
             logger.error(f"Error sanitizing claim data: {e}")
+            raise
+
+    def create_claim_id_column(self, claims_df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Creates a unique claim ID column in the DataFrame.
+
+        Args:
+            claims_df (pd.DataFrame): The DataFrame with claim data.
+
+        Returns:
+            pd.DataFrame: The DataFrame with the new claim ID column.
+        """
+        try:
+            claims_df["id_claim"] = (
+                claims_df["nr_claim"].astype(str)
+                + claims_df["cd_patient"]
+                .str.replace(r"\.", "", regex=True)
+                .str.replace(r"\-", "", regex=True)
+                + claims_df["cd_procedure"]
+            )
+            return claims_df
+        except Exception as e:
+            logger.error(f"Error creating claim ID column: {e}")
             raise
 
     def create_claim_data(self, row: pd.Series) -> InsuranceClaimCreate:
@@ -125,8 +179,9 @@ class IngestInsuranceClaims:
         """
         try:
             return InsuranceClaimCreate(
+                id_claim=row["id_claim"],
                 nr_claim=row["nr_claim"],
-                nr_request=row["nr_request"],
+                nr_request=row["nr_request"] if pd.notna(row["nr_request"]) else None,
                 cd_patient=row["cd_patient"],
                 dt_issue=row["dt_issue"],
                 dm_service=row["dm_service"],
@@ -179,6 +234,7 @@ class IngestInsuranceClaims:
             claims_df = self.sanitize_claim_columns(claims_df)
             claims_df = self.format_date_columns(claims_df)
             claims_df = self.sanitize_claim_data(claims_df)
+            claims_df = self.create_claim_id_column(claims_df)
 
             claims_data = []
             for _, row in claims_df.iterrows():
@@ -204,13 +260,13 @@ class IngestInsuranceClaims:
         updated_num = 0
         try:
             for claim_data in claims_data:
-                existing_claim = service.get_by_claim_number(claim_data.nr_claim)
+                existing_claim = service.get_by_id_claim(claim_data.id_claim)
                 if existing_claim:
-                    logger.info(f"Updating existing claim: {claim_data.nr_claim}")
-                    service.update(claim_data.nr_claim, claim_data)
+                    logger.info(f"Updating existing claim: {claim_data.id_claim}")
+                    service.update(claim_data.id_claim, claim_data)
                     updated_num += 1
                 else:
-                    logger.info(f"Inserting new claim: {claim_data.nr_claim}")
+                    logger.info(f"Inserting new claim: {claim_data.id_claim}")
                     service.create(claim_data)
                     inserted_num += 1
             logger.info(f"Inserted {inserted_num} new claims.")
@@ -242,7 +298,4 @@ class IngestInsuranceClaims:
 
 
 if __name__ == "__main__":
-    IngestInsuranceClaims().run(
-        year=2026,
-        month=1
-    )
+    IngestInsuranceClaims().run(year=2026, month=1)

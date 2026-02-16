@@ -4,8 +4,9 @@ from pydantic import BaseModel, ConfigDict
 
 
 class InsuranceClaimBase(BaseModel):
+    id_claim: str
     nr_claim: str
-    nr_request: str
+    nr_request: str | None = None
     cd_patient: str
     dt_issue: date
     dm_service: datetime

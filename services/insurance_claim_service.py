@@ -25,6 +25,26 @@ class InsuranceClaimService:
             logger.error(f"Error retrieving insurance claims: {e}")
             raise
 
+    def get_by_id_claim(self, id_claim: str) -> InsuranceClaimResponse | None:
+        """
+        Retrieves an insurance claim by its ID claim.
+
+        Args:
+            id_claim (str): The ID claim to search for.
+
+        Returns:
+            InsuranceClaimResponse | None: The insurance claim response if found, otherwise None.
+        """
+        try:
+            stmt = select(InsuranceClaim).where(InsuranceClaim.id_claim == id_claim)
+            claim = self.session.scalars(stmt).first()
+            if claim:
+                return InsuranceClaimResponse.model_validate(claim)
+            return None
+        except Exception as e:
+            logger.error(f"Error retrieving insurance claim by ID claim: {e}")
+            raise
+
     def get_by_claim_number(self, nr_claim: str) -> InsuranceClaimResponse | None:
         """
         Retrieves an insurance claim by its claim number.
@@ -91,6 +111,7 @@ class InsuranceClaimService:
         """
         try:
             claim = InsuranceClaim(
+                id_claim=claim_data.id_claim,
                 nr_claim=claim_data.nr_claim,
                 nr_request=claim_data.nr_request,
                 cd_patient=claim_data.cd_patient,
