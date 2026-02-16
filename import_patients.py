@@ -1,51 +1,14 @@
-from datetime import datetime
-from pathlib import Path
-
 import pandas as pd
 
 from core import db, logger
 from schemas import PatientCreate
 from services import PatientService
+from services.read_csv import ReadCSV
 
 
 class IngestPatients:
     def __init__(self):
-        self.data_dir = Path("./data")
-        self.file_pattern = "{year}{month:02d}_atendimentos_sao_lucas.csv"
-
-    def _get_csv_path(self, year: int | None = None, month: int | None = None) -> Path:
-        """
-        Builds the CSV file path for the given year and month.
-
-        Args:
-            year (int | None, optional): The year for the CSV file. Defaults to None.
-            month (int | None, optional): The month for the CSV file. Defaults to None.
-
-        Returns:
-            Path: The path to the CSV file.
-        """
-        now = datetime.now()
-        year = year or now.year
-        month = month or now.month
-
-        filename = self.file_pattern.format(year=year, month=month)
-        return self.data_dir / filename
-
-    def read_csv_file(self, csv_path: Path) -> pd.DataFrame:
-        """
-        Reads the CSV file and returns a DataFrame.
-
-        Args:
-            csv_path (Path): The path to the CSV file.
-
-        Returns:
-            pd.DataFrame: The DataFrame containing the CSV data.
-        """
-        try:
-            return pd.read_csv(csv_path, encoding="utf-8-sig")
-        except Exception as e:
-            logger.error(f"Error reading CSV file: {e}")
-            raise
+        self.csv_reader = ReadCSV()
 
     def sanitize_patient_columns(self, patients_df: pd.DataFrame) -> pd.DataFrame:
         """
@@ -134,14 +97,7 @@ class IngestPatients:
             list[PatientCreate]: A list of PatientCreate objects created from the CSV data.
         """
         try:
-            csv_path = self._get_csv_path(year, month)
-
-            if not csv_path.exists():
-                raise FileNotFoundError(f"CSV file not found: {csv_path}")
-            else:
-                df = self.read_csv_file(csv_path)
-
-            logger.info(f"Reading file: {csv_path}")
+            df = self.csv_reader.read(year, month)
 
             patients_df = df[
                 ["Cd Beneficiário", "Beneficiário", "Endereço Beneficiário"]
@@ -169,11 +125,8 @@ class IngestPatients:
         Args:
             service (PatientService): The patient service to use for database operations.
             patients_data (list[PatientCreate]): The list of patient data to insert or update.
-
-        Returns:
-            None
         """
-        insertes_num = 0
+        inserted_num = 0
         updated_num = 0
         try:
             for patient_data in patients_data:
@@ -185,8 +138,8 @@ class IngestPatients:
                 else:
                     logger.info(f"Inserting new patient: {patient_data.cd_patient}")
                     service.create(patient_data)
-                    insertes_num += 1
-            logger.info(f"Inserted {insertes_num} new patients.")
+                    inserted_num += 1
+            logger.info(f"Inserted {inserted_num} new patients.")
             logger.info(f"Updated {updated_num} existing patients.")
         except Exception as e:
             logger.error(f"Error inserting or updating patients: {e}")
