@@ -10,6 +10,7 @@ from models.base import Base
 
 if TYPE_CHECKING:
     from models.patient import Patient
+    from models.procedures import Procedure
 
 
 class InsuranceClaim(Base):
@@ -66,7 +67,8 @@ class InsuranceClaim(Base):
         comment="Flag indicando se o atendimento é retorno",
     )
     cd_procedure: Mapped[str] = mapped_column(
-        String(20),
+        String(30),
+        ForeignKey("procedures.cd_procedure"),
         nullable=False,
         comment="Código do procedimento realizado",
     )
@@ -95,6 +97,7 @@ class InsuranceClaim(Base):
     )
 
     patient: Mapped["Patient"] = relationship(back_populates="insurance_claims")
+    procedure: Mapped["Procedure"] = relationship(back_populates="insurance_claims")
 
     def __repr__(self) -> str:
         return (
