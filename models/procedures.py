@@ -11,6 +11,7 @@ from models.base import Base
 
 if TYPE_CHECKING:
     from models.insurance_claim import InsuranceClaim
+    from models.invoice import Invoice
 
 
 class Procedure(Base):
@@ -52,6 +53,7 @@ class Procedure(Base):
     insurance_claims: Mapped[list["InsuranceClaim"]] = relationship(
         back_populates="procedure",
     )
-
+    invoices: Mapped[list["Invoice"]] = relationship(back_populates="procedure")
+    
     def __repr__(self) -> str:
         return f"<Procedure(cd_procedure='{self.cd_procedure}', nm_procedure='{self.nm_procedure}', vl_procedure='{self.vl_procedure}')>"

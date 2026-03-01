@@ -498,7 +498,7 @@ class IngestInvoiceData:
                         data = self.extract_data(line)
                         data["nr_page"] = page_num
                         data["dt_base"] = self.dt_base
-                        data["nm_file"] = self.file_name
+                        data["nm_file"] = self.set_file_name
                         invoice_data.append(data)
             return invoice_data
         except Exception as e:
@@ -578,4 +578,4 @@ class IngestInvoiceData:
 
 
 if __name__ == "__main__":
-    IngestInvoiceData(year=2026, month=1)
+    IngestInvoiceData(year=2026, month=1).run()

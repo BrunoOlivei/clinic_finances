@@ -10,6 +10,7 @@ from models.base import Base
 
 if TYPE_CHECKING:
     from models.insurance_claim import InsuranceClaim
+    from models.invoice import Invoice
 
 
 class Patient(Base):
@@ -44,6 +45,7 @@ class Patient(Base):
     insurance_claims: Mapped[list["InsuranceClaim"]] = relationship(
         back_populates="patient"
     )
+    invoices: Mapped[list["Invoice"]] = relationship(back_populates="patient")
 
     def __repr__(self) -> str:
         return (

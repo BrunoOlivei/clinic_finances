@@ -23,7 +23,7 @@ class Invoice(Base):
     id_invoice: Mapped[str] = mapped_column(
         String(36),
         primary_key=True,
-        server_default=func.uuid_generate_v4(),
+        server_default=func.gen_random_uuid(),
         comment="ID único criado automaticamente para cada fatura",
     )
 
@@ -59,7 +59,7 @@ class Invoice(Base):
         Integer, nullable=False, comment="Mês e ano de referencia"
     )
     nm_file: Mapped[str] = mapped_column(
-        String(30), nullable=False, comment="Nome do arquivo de origem"
+        String(255), nullable=False, comment="Nome do arquivo de origem"
     )
     created_at: Mapped[datetime] = mapped_column(
         DateTime,
