@@ -4,9 +4,9 @@ from schemas.insurance_claim import (
     InsuranceClaimResponse,
     InsuranceClaimUpdate,
 )
+from schemas.invoice import InvoiceBase, InvoiceCreate, InvoiceResponse, InvoiceUpdate
 from schemas.patient import PatientBase, PatientCreate, PatientResponse, PatientUpdate
-
-from schemas.procedures import (ProcedureBase, ProcedureCreate, ProcedureResponse)
+from schemas.procedures import ProcedureBase, ProcedureCreate, ProcedureResponse
 
 __all__ = [
     "InsuranceClaimBase",
@@ -20,4 +20,8 @@ __all__ = [
     "ProcedureBase",
     "ProcedureCreate",
     "ProcedureResponse",
+    "InvoiceBase",
+    "InvoiceCreate",
+    "InvoiceResponse",
+    "InvoiceUpdate",
 ]

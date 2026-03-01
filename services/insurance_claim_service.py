@@ -130,6 +130,7 @@ class InsuranceClaimService:
             return InsuranceClaimResponse.model_validate(claim)
         except Exception as e:
             logger.error(f"Error creating insurance claim: {e}")
+            self.session.rollback()
             raise
 
     def update(
@@ -159,4 +160,5 @@ class InsuranceClaimService:
             return InsuranceClaimResponse.model_validate(claim)
         except Exception as e:
             logger.error(f"Error updating insurance claim: {e}")
+            self.session.rollback()
             raise

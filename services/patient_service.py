@@ -79,6 +79,7 @@ class PatientService:
             return PatientResponse.model_validate(patient)
         except Exception as e:
             logger.error(f"Error creating patient: {e}")
+            self.session.rollback()
             raise
 
     def update(
@@ -108,4 +109,5 @@ class PatientService:
             return PatientResponse.model_validate(patient)
         except Exception as e:
             logger.error(f"Error updating patient: {e}")
+            self.session.rollback()
             raise
