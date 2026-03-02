@@ -109,6 +109,12 @@ class IngestPatients:
 
             patients_data = []
             for _, row in patients_df.iterrows():
+                if pd.isna(row["cd_patient"]) or pd.isna(row["nm_patient"]):
+                    logger.warning(
+                        f"Skipping row with missing required fields: {row.to_dict()}"
+                    )
+                    continue
+
                 patients_data.append(self.create_patient_data(row))
 
             return patients_data
@@ -133,7 +139,7 @@ class IngestPatients:
                 existing_patient = service.get_by_patient_code(patient_data.cd_patient)
                 if existing_patient:
                     logger.info(f"Updating existing patient: {patient_data.cd_patient}")
-                    service.update(existing_patient.id, patient_data)
+                    service.update(existing_patient.cd_patient, patient_data)
                     updated_num += 1
                 else:
                     logger.info(f"Inserting new patient: {patient_data.cd_patient}")
