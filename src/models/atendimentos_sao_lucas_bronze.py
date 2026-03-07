@@ -1,6 +1,7 @@
 from datetime import datetime
+import uuid
 
-from sqlalchemy import Boolean, DateTime, Integer, String, func
+from sqlalchemy import Boolean, DateTime, Integer, String, UUID, text
 from sqlalchemy.orm import Mapped, mapped_column
 
 from src.core import BronzeBase
@@ -24,10 +25,10 @@ class AtendimentosSaoLucasBronze(BronzeBase):
         "comment": "Tabela de atendimentos importados da operadora São Lucas, na camada bronze",
     }
 
-    id: Mapped[str] = mapped_column(
-        String(36),
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID,
         primary_key=True,
-        default=func.uuid_generate_v4(),
+        server_default=text("gen_random_uuid()"),
         comment="Identificador único do registro (UUID)",
     )
     terminal: Mapped[str] = mapped_column(
@@ -67,7 +68,7 @@ class AtendimentosSaoLucasBronze(BronzeBase):
     )
     beneficiario: Mapped[str] = mapped_column(
         String(255),
-        nullable=False,
+        nullable=True,
         comment="Nome do beneficiário (nome do paciente)",
     )
     endereco_beneficiario: Mapped[str] = mapped_column(

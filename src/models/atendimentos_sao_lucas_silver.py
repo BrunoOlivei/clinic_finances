@@ -1,6 +1,7 @@
 from datetime import date, datetime, time
+import uuid
 
-from sqlalchemy import Boolean, Date, DateTime, Integer, String, Time, func
+from sqlalchemy import Boolean, Date, DateTime, Integer, String, Time, UUID, text
 from sqlalchemy.orm import Mapped, mapped_column
 
 from src.core import SilverBase
@@ -13,10 +14,10 @@ class AtendimentosSaoLucasSilver(SilverBase):
         "comment": "Tabela de atendimentos importados da operadora São Lucas, na camada silver",
     }
 
-    id: Mapped[str] = mapped_column(
-        String(36),
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID,
         primary_key=True,
-        default=func.uuid_generate_v4(),
+        server_default=text("gen_random_uuid()"),
         comment="Identificador único do registro (UUID)",
     )
     cd_terminal: Mapped[str] = mapped_column(
@@ -54,7 +55,7 @@ class AtendimentosSaoLucasSilver(SilverBase):
     )
     nm_beneficiario: Mapped[str] = mapped_column(
         String(255),
-        nullable=False,
+        nullable=True,
         comment="Nome do beneficiário (nome do paciente)",
     )
     ds_endereco_beneficiario: Mapped[str] = mapped_column(
@@ -114,7 +115,7 @@ class AtendimentosSaoLucasSilver(SilverBase):
     )
     qt_sessoes_executadas: Mapped[int] = mapped_column(
         Integer,
-        nullable=False,
+        nullable=True,
         comment="Número de sessões executadas, se aplicável",
     )
     cd_prestador: Mapped[str] = mapped_column(
@@ -147,10 +148,10 @@ class AtendimentosSaoLucasSilver(SilverBase):
         nullable=False,
         comment="Data de exportação do atendimento no sistema de origem (formato: dd/mm/yyyy)",
     )
-    dt_senha: Mapped[str] = mapped_column(
-        String(10),
+    dt_senha: Mapped[date] = mapped_column(
+        Date,
         nullable=False,
-        comment="Data de geração da senha, se aplicável (formato: dd/mm/yyyy)",
+        comment="Data de geração da senha, se aplicável",
     )
     cd_operador_execucao: Mapped[str] = mapped_column(
         String(6),
