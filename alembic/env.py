@@ -1,11 +1,10 @@
 from logging.config import fileConfig
 
-from sqlalchemy import engine_from_config, pool
+from sqlalchemy import engine_from_config, pool, schema
 
+import src.models  # noqa: F401
 from alembic import context
-
-from core import settings
-from models import Base
+from src.core import Base, BronzeBase, GoldBase, SilverBase, settings  # noqa: F401
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -47,6 +46,12 @@ def run_migrations_offline() -> None:
         context.run_migrations()
 
 
+def include_object(object, name, type_, reflected, compare_to):
+    if type_ == "table" and object.schema not in [None, "brz", "slv", "gld"]:
+        return False
+    return True
+
+
 def run_migrations_online() -> None:
     """Run migrations in 'online' mode.
 
@@ -61,15 +66,36 @@ def run_migrations_online() -> None:
     )
 
     with connectable.connect() as connection:
+        for schema_name in ["brz", "slv", "gld"]:
+            connection.execute(schema.CreateSchema(schema_name, if_not_exists=True))
+        connection.commit()
+
         context.configure(
-            connection=connection, target_metadata=target_metadata
+            connection=connection,
+            target_metadata=target_metadata,
+            include_schemas=True,
+            include_object=include_object,
         )
 
         with context.begin_transaction():
             context.run_migrations()
 
 
+def create_schemas():
+    """Create schemas if they do not exist."""
+    engine = engine_from_config(
+        config.get_section(config.config_ini_section, {}),
+        prefix="sqlalchemy.",
+        poolclass=pool.NullPool,
+    )
+    with engine.connect() as connection:
+        for schema_name in ["brz", "slv", "gld"]:
+            connection.execute(schema.CreateSchema(schema_name, if_not_exists=True))
+    connection.commit()
+
+
 if context.is_offline_mode():
     run_migrations_offline()
 else:
+    create_schemas()
     run_migrations_online()

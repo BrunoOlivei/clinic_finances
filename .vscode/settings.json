@@ -3,13 +3,15 @@
         "**/__pycache__": true,
         "**/*.pyc": true,
         ".venv": true,
-        "uv.lock": true
+        "uv.lock": true,
+        ".vscode": true,
     },
     "search.exclude": {
         "**/__pycache__": true,
         ".venv": true,
         "data": true,
-        "alembic/versions": true
+        "alembic/versions": true,
+        ".vscode": true
     },
     "[python]": {
         "editor.defaultFormatter": "charliermarsh.ruff",
