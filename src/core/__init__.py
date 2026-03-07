@@ -3,6 +3,7 @@ from src.core.database import db
 from src.core.logger import logger
 from src.core.base import Base, BronzeBase, SilverBase, GoldBase
 from src.core.read_file import ReadFile
+from src.core.utils import set_default_dt_base
 
 
-__all__ = ["settings", "db", "logger", "Base", "BronzeBase", "SilverBase", "GoldBase", "ReadFile"]
+__all__ = ["settings", "db", "logger", "Base", "BronzeBase", "SilverBase", "GoldBase", "ReadFile", "set_default_dt_base"]
