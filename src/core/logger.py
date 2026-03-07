@@ -7,8 +7,9 @@ def _db_sink(message):
     """Sink that persists WARNING+ logs to the database."""
     record = message.record
 
-    from core.database import db
-    from models.log import Log
+    from src.models.log import Log
+
+    from src.core.database import db
 
     session = db.session_factory()
     try:
@@ -63,4 +64,4 @@ def setup_logger():
     return logger
 
 
-logger = setup_logger()
+logger = setup_logger()  # noqa: F811

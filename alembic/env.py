@@ -47,7 +47,7 @@ def run_migrations_offline() -> None:
 
 
 def include_object(object, name, type_, reflected, compare_to):
-    if type_ == "table" and object.schema not in [None, "brz", "slv", "gld"]:
+    if type_ == "table" and object.schema not in [None, "brz", "slv", "gld", "log"]:
         return False
     return True
 
@@ -66,7 +66,7 @@ def run_migrations_online() -> None:
     )
 
     with connectable.connect() as connection:
-        for schema_name in ["brz", "slv", "gld"]:
+        for schema_name in ["brz", "slv", "gld", "log"]:
             connection.execute(schema.CreateSchema(schema_name, if_not_exists=True))
         connection.commit()
 
@@ -89,7 +89,7 @@ def create_schemas():
         poolclass=pool.NullPool,
     )
     with engine.connect() as connection:
-        for schema_name in ["brz", "slv", "gld"]:
+        for schema_name in ["brz", "slv", "gld", "log"]:
             connection.execute(schema.CreateSchema(schema_name, if_not_exists=True))
     connection.commit()
 
