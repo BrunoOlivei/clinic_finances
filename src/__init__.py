@@ -1,1 +1,0 @@
-atendimentos_sao_lucas_data_path = "./data/atendimentos_sao_lucas"
