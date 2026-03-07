@@ -18,6 +18,7 @@ logs/
 *.vcf
 *.xml
 *.pdf
+*.sql
 
 ### Python ###
 # Byte-compiled / optimized / DLL files
