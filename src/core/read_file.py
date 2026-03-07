@@ -1,13 +1,15 @@
 import os
+import re
 from csv import Sniffer
 from pathlib import Path
 from typing import Optional
 
 import chardet
+import unicodedata
 import pandas as pd
 from pandas import errors as pd_errors
 
-from core import logger
+from src.core import logger
 
 
 class ReadFile:
@@ -74,7 +76,7 @@ class ReadFile:
         try:
             files = os.listdir(file_path)
             for file in files:
-                if file.lower().split(".")[0] == file_name.lower():
+                if os.path.splitext(file.lower())[0] == file_name.lower():
                     return file
             raise FileNotFoundError(
                 f"The file {file_name} was not found in the directory {file_path}."
@@ -275,3 +277,49 @@ class ReadFile:
         except Exception as e:
             logger.error(f"Error loading data: {e}")
             raise e
+
+    def column_sanitizer(self, column_name: str) -> str:
+        """
+        Sanitize column name changing it to lower casa, removing the accents and replacing especial characteres to underscore
+
+        Args:
+            column_name (str): the column name to be sanitize
+
+        Return:
+            str: the column name sanitized
+        """
+        try:
+            normalized = unicodedata.normalize("NFD", column_name)
+            without_accents = "".join(c for c in normalized if unicodedata.category(c) != "Mn")
+            lowered = without_accents.lower()
+            sanitized = re.sub(r"[^a-z0-9]+", "_", lowered)
+            column_sanitized = sanitized.strip("_")
+        except Exception as e:
+            logger.error(f"Error sanitizing column: {column_name}, error: {e}")
+            raise
+        else:
+            return column_sanitized
+        
+
+    def sanitize_columns(self, df: pd.DataFrame) -> pd.DataFrame:
+        try:
+            for column in df.columns:
+                sanitized_column = self.column_sanitizer(column)
+                df.rename(columns={column: sanitized_column}, inplace=True)
+        except Exception as e:
+            logger.error(f"Error sanitizing columns: {e}")     
+            raise
+        else:
+            logger.info("Columns sanitized successfuly")
+            return df
+
+    def main(self) -> pd.DataFrame:
+        try:
+            df = self.load_data()
+            df_sanitized = self.sanitize_columns(df)
+        except Exception as e:
+            logger.error(f"Error in ReadFile main method: {e}")
+            raise
+        else:
+            logger.info("Data loaded and sanitized successfully")
+            return df_sanitized
