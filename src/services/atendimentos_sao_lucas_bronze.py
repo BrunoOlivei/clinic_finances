@@ -127,7 +127,7 @@ class AtendimentosSaoLucasBronze:
             )
         except Exception as e:
             logger.error(
-                f"Error creating AtendimentoSaoLucasBronzeSchema {row['beneficiario']} object: {e}"
+                f"Error creating AtendimentoSaoLucasBronzeSchema object: {e}"
             )
             raise e
         else:
