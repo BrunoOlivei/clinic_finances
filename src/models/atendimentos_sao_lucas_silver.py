@@ -8,6 +8,17 @@ from src.core import SilverBase
 
 
 class AtendimentosSaoLucasSilver(SilverBase):
+    """
+    Data model for the "tb_atendimentos_sao_lucas" table in the silver layer,
+    representing the raw data of attendances imported from the São Lucas operator.
+    This model includes fields for terminal, guide number, emission and attendance dates,
+    beneficiary information, requester and provider details, procedure information,
+    and control columns for tracking ingestion and export status.
+
+    Args:
+        BronzeBase (_type_): Base class for silver layer models, providing common attributes and methods for all silver tables.
+    """
+
     __tablename__ = "tb_atendimentos_sao_lucas"
     __table_args__ = {
         "schema": "slv",
