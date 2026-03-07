@@ -209,11 +209,11 @@ class AtendimentosSaoLucasBronze:
             for file in files:
                 if os.path.splitext(file.lower())[0] == self.file_name:
                     source_file = os.path.join(self.landzone_path, file)
-            destination_file = os.path.join(self.processed_path, self.file_name)
-            os.rename(source_file, destination_file)
-            logger.info(
-                f"File moved successfully from {source_file} to {destination_file}"
-            )
+                    destination_file = os.path.join(self.processed_path, file)
+                    os.rename(source_file, destination_file)
+                    logger.info(
+                        f"File moved successfully from {source_file} to {destination_file}"
+                    )
         except Exception as e:
             logger.error(
                 f"Error moving file from {source_file} to {destination_file}: {e}"
