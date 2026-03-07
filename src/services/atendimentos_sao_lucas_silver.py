@@ -17,10 +17,10 @@ class AtendimentosSaoLucasSilver:
         self.file_name = f"{self.dt_base}_atendimentos_sao_lucas"
         self.schema = {
             "terminal": {
-                "type": str,
+                "type": "string",
             },
             "guia": {
-                "type": int,
+                "type": "integer",
             },
             "emissao": {
                 "type": "date",
@@ -39,61 +39,61 @@ class AtendimentosSaoLucasSilver:
                 "format": "%d/%m/%Y",
             },
             "cd_beneficiario": {
-                "type": str,
+                "type": "string",
             },
             "beneficiario": {
-                "type": str,
+                "type": "string",
             },
             "endereco_beneficiario": {
-                "type": str,
+                "type": "string",
             },
             "solicitante": {
-                "type": str,
+                "type": "string",
             },
             "solicitante_1": {
-                "type": str,
+                "type": "string",
             },
             "especialidade": {
-                "type": str,
+                "type": "string",
             },
             "status": {
-                "type": str,
+                "type": "string",
             },
             "tipo": {
-                "type": str,
+                "type": "string",
             },
             "retorno": {
-                "type": bool,
+                "type": "boolean",
             },
             "senha_terapia": {
-                "type": str,
+                "type": "string",
             },
             "procedimento": {
-                "type": str,
+                "type": "string",
             },
             "procedimento_1": {
-                "type": str,
+                "type": "string",
             },
             "quantidade": {
-                "type": int,
+                "type": "integer",
             },
             "sessoes_executadas": {
-                "type": "nullable_int",
+                "type": "integer",
             },
             "prestador": {
-                "type": str,
+                "type": "string",
             },
             "prestador_1": {
-                "type": str,
+                "type": "string",
             },
             "especialidade_1": {
-                "type": str,
+                "type": "string",
             },
             "indicacao_clinica": {
-                "type": str,
+                "type": "string",
             },
             "status_export": {
-                "type": str,
+                "type": "string",
             },
             "dt_export": {
                 "type": "date",
@@ -104,16 +104,16 @@ class AtendimentosSaoLucasSilver:
                 "format": "%d/%m/%Y",
             },
             "operador_execucao": {
-                "type": str,
+                "type": "string",
             },
             "operador_senha": {
-                "type": str,
+                "type": "string",
             },
             "operador_canc": {
-                "type": str,
+                "type": "string",
             },
             "observacao": {
-                "type": str,
+                "type": "string",
             },
         }
 
@@ -166,10 +166,19 @@ class AtendimentosSaoLucasSilver:
                 df[column] = pd.to_datetime(
                     df[column], format=properties["format"], errors="coerce"
                 ).dt.time
-            elif properties["type"] == "nullable_int":
+            elif properties["type"] == "integer":
                 df[column] = pd.to_numeric(df[column], errors="coerce").astype("Int64")
+            elif properties["type"] == "string":
+                df[column] = df[column].str.strip().astype(str)
+            elif properties["type"] == "boolean":
+                df[column] = df[column].apply(
+                    lambda x: True if x.lower() in ["true", "1", "yes", "sim"] else False
+                )
             else:
-                df[column] = df[column].astype(properties["type"])
+                raise ValueError(
+                    "Error formating type of columns data"
+                )
+                
         return df
 
     def create_service_data(self, row: pd.Series) -> AtendimentoSaoLucasSilverSchema:

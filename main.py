@@ -30,12 +30,3 @@ if __name__ == "__main__":
     Pipeline(
         dt_base=202507
     ).run()
-
-
-#%%
-# obj = AtendimentosSaoLucasSilver(
-#     dt_base=202507
-# )
-# df = obj.main()
-# print(df.iloc[0, 0])
-
