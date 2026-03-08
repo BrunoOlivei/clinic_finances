@@ -2,7 +2,7 @@ import pandas as pd
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from src.core import db, logger, set_default_dt_base
+from src.core import db, logger, set_default_dt_base, format_type_data
 from src.models import AtendimentosSaoLucasBronze as AtendimentosBronzeModel
 from src.models import AtendimentosSaoLucasSilver as AtendimentosSilverModel
 from src.schemas import AtendimentoSaoLucasSilverSchema
@@ -134,52 +134,13 @@ class AtendimentosSaoLucasSilver:
             )
             df = pd.read_sql_query(stmt, session.connection())
         except Exception as e:
-            logger.error(f"Error loading data for Atendimentos Sao Lucas Silver: {e}")
+            logger.error(f"Error loading data for Atendimentos Sao Lucas Bronze: {e}")
             raise
         else:
             logger.info(
-                f"Data loaded successfully for Atendimentos Sao Lucas Silver: {self.file_name}"
+                f"Data loaded successfully for Atendimentos Sao Lucas Bronze: {self.file_name}"
             )
             return df
-
-    def format_type_data(self, df: pd.DataFrame) -> pd.DataFrame:
-        """
-        Format the data types of the DataFrame columns according to the defined schema.
-
-        Args:
-            df (pd.DataFrame): The DataFrame to be formatted.
-
-        Returns:
-            pd.DataFrame: The DataFrame with formatted data types.
-        """
-        for column, properties in self.schema.items():
-            if column not in df.columns:
-                continue
-            if properties["type"] == "date":
-                df[column] = pd.to_datetime(
-                    df[column],
-                    format=properties["format"],
-                    errors="coerce",
-                    dayfirst=True,
-                ).dt.date
-            elif properties["type"] == "time":
-                df[column] = pd.to_datetime(
-                    df[column], format=properties["format"], errors="coerce"
-                ).dt.time
-            elif properties["type"] == "integer":
-                df[column] = pd.to_numeric(df[column], errors="coerce").astype("Int64")
-            elif properties["type"] == "string":
-                df[column] = df[column].str.strip().astype(str)
-            elif properties["type"] == "boolean":
-                df[column] = df[column].apply(
-                    lambda x: True if x.lower() in ["true", "1", "yes", "sim"] else False
-                )
-            else:
-                raise ValueError(
-                    "Error formating type of columns data"
-                )
-                
-        return df
 
     def create_service_data(self, row: pd.Series) -> AtendimentoSaoLucasSilverSchema:
         """
@@ -327,7 +288,7 @@ class AtendimentosSaoLucasSilver:
         try:
             with next(db.get_session()) as session:
                 df = self.load_data(session)
-                df = self.format_type_data(df)
+                df = format_type_data(df, self.schema)
 
                 num_rows = len(df)
                 affected_rows = 0
