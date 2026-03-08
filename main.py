@@ -5,6 +5,7 @@ from src.services import (
     AtendimentosSaoLucasBronze,
     AtendimentosSaoLucasSilver,
     SolicitacoesSaoLucasBronze,
+    SolicitacoesSaoLucasSilver
 )
 
 
@@ -23,7 +24,11 @@ class Pipeline:
 
     def pipeline_solicitacoes_sao_lucas(self) -> bool:
         bronze_finished = SolicitacoesSaoLucasBronze(dt_base=self.dt_base).main()
-        return bronze_finished
+        if bronze_finished:
+            silver_finished = SolicitacoesSaoLucasSilver(dt_base=self.dt_base).main()
+            return silver_finished
+        else:
+            return False
 
     def run_all_pipelines(self):
         pipeline_atendimento = self.pipeline_atendimento_sao_lucas()

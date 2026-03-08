@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 
 from src.core import ReadFile, db, logger, set_default_dt_base
 from src.models import SolicitacoesSaoLucasBronze as SolicitacoesBronzeModel
-from src.schemas import SolicitacaoSaoLucasBronzeSchema
+from src.schemas import SolicitacoesSaoLucasBronzeSchema
 
 
 class SolicitacoesSaoLucasBronze:
@@ -76,18 +76,18 @@ class SolicitacoesSaoLucasBronze:
             )
             return df
 
-    def create_claims_data(self, row: pd.Series) -> SolicitacaoSaoLucasBronzeSchema:
+    def create_claims_data(self, row: pd.Series) -> SolicitacoesSaoLucasBronzeSchema:
         """
-        Create a SolicitacaoSaoLucasBronzeSchema object from a row of the DataFrame.
+        Create a SolicitacoesSaoLucasBronzeSchema object from a row of the DataFrame.
 
         Args:
             row (pd.Series): A row from the DataFrame.
         
         Returns:
-            SolicitacaoSaoLucasBronzeSchema: The created schema object
+            SolicitacoesSaoLucasBronzeSchema: The created schema object
         """
         try:
-            claim_data = SolicitacaoSaoLucasBronzeSchema(
+            claim_data = SolicitacoesSaoLucasBronzeSchema(
                 solicitacao=row["solicitacao"],
                 data=row["data"],
                 validade_solicitacao=row["validade_solicitacao"],
@@ -160,14 +160,14 @@ class SolicitacoesSaoLucasBronze:
             return result
 
     def insert_or_update_claims(
-        self, session: Session, claim_data: SolicitacaoSaoLucasBronzeSchema
+        self, session: Session, claim_data: SolicitacoesSaoLucasBronzeSchema
     ) -> None:
         """
         Insert a new claim into the database or update an existing claim if it already exists.
 
         Args:
             session (Session): The database session to use for the operation.
-            claim_data (SolicitacaoSaoLucasBronzeSchema): The claim data to be inserted or updated.
+            claim_data (SolicitacoesSaoLucasBronzeSchema): The claim data to be inserted or updated.
         """
         try:
             existing_claim = self.get_claim_by_solicitacao_procedimento(
