@@ -4,10 +4,10 @@ from src.core import logger
 from src.services import (
     AtendimentosSaoLucasBronze,
     AtendimentosSaoLucasSilver,
-    SolicitacoesSaoLucasBronze,
-    SolicitacoesSaoLucasSilver,
     RecibosSaoLucasBronze,
     RecibosSaoLucasSilver,
+    SolicitacoesSaoLucasBronze,
+    SolicitacoesSaoLucasSilver,
 )
 
 
@@ -17,6 +17,12 @@ class Pipeline:
         self.pipeline_name = pipeline_name
 
     def pipeline_atendimento_sao_lucas(self) -> bool:
+        """
+        Run the atendimento sao lucas pipeline (bronze and silver stages).
+
+        Returns:
+            bool: True if all stages of pipeline return True, else False
+        """
         bronze_finished = AtendimentosSaoLucasBronze(dt_base=self.dt_base).main()
         if bronze_finished:
             silver_finished = AtendimentosSaoLucasSilver(dt_base=self.dt_base).main()
@@ -25,6 +31,12 @@ class Pipeline:
             return False
 
     def pipeline_solicitacoes_sao_lucas(self) -> bool:
+        """
+        Run the solicitacoes sao lucas pipeline (bronze and silver stages).
+
+        Returns:
+            bool: True if all stages of pipeline return True, else False
+        """
         bronze_finished = SolicitacoesSaoLucasBronze(dt_base=self.dt_base).main()
         if bronze_finished:
             silver_finished = SolicitacoesSaoLucasSilver(dt_base=self.dt_base).main()
@@ -33,6 +45,12 @@ class Pipeline:
             return False
 
     def pipeline_recibos_sao_lucas(self) -> bool:
+        """
+        Run the recibos sao lucas pipeline (bronze and silver stages).
+
+        Returns:
+            bool: True if all stages of pipeline return True, else False
+        """
         bronze_finished = RecibosSaoLucasBronze(dt_base=self.dt_base).main()
         if bronze_finished:
             silver_finished = RecibosSaoLucasSilver(dt_base=self.dt_base).main()
@@ -41,6 +59,12 @@ class Pipeline:
             return False
 
     def run_all_pipelines(self):
+        """
+        Run all the sao lucas pipeline (bronze and silver stages).
+
+        Returns:
+            bool: True if all stages of pipeline return True, else False
+        """
         pipeline_atendimento = self.pipeline_atendimento_sao_lucas()
         if pipeline_atendimento:
             logger.info("ATENDIMENTO SAO LUCAS PIPELINE RUN SUCESSFULY")
@@ -54,6 +78,9 @@ class Pipeline:
             logger.info("RECIBOS SAO LUCAS PIPELINE RUN SUCESSFULY")
 
     def run(self):
+        """
+        Run the pipeline according to the pipeline_name parameter. If pipeline_name is None, run all pipelines.
+        """
         if self.pipeline_name == "atendimento":
             pipeline_atendimento = self.pipeline_atendimento_sao_lucas()
             if pipeline_atendimento:
@@ -71,4 +98,4 @@ class Pipeline:
 
 
 if __name__ == "__main__":
-    Pipeline(dt_base=202602, pipeline_name="solicitacao").run()
+    Pipeline(dt_base=202602, pipeline_name="atendimento").run()
