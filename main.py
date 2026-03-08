@@ -5,7 +5,8 @@ from src.services import (
     AtendimentosSaoLucasBronze,
     AtendimentosSaoLucasSilver,
     SolicitacoesSaoLucasBronze,
-    SolicitacoesSaoLucasSilver
+    SolicitacoesSaoLucasSilver,
+    RecibosSaoLucasBronze,
 )
 
 
@@ -30,6 +31,10 @@ class Pipeline:
         else:
             return False
 
+    def pipeline_recibos_sao_lucas(self) -> bool:
+        bronze_finished = RecibosSaoLucasBronze(dt_base=self.dt_base).main()
+        return bronze_finished
+
     def run_all_pipelines(self):
         pipeline_atendimento = self.pipeline_atendimento_sao_lucas()
         if pipeline_atendimento:
@@ -38,6 +43,10 @@ class Pipeline:
         pipeline_solicitacoes = self.pipeline_solicitacoes_sao_lucas()
         if pipeline_solicitacoes:
             logger.info("SOLICITACOES SAO LUCAS PIPELINE RUN SUCESSFULY")
+
+        pipeline_recibos = self.pipeline_recibos_sao_lucas()
+        if pipeline_recibos:
+            logger.info("RECIBOS SAO LUCAS PIPELINE RUN SUCESSFULY")
 
     def run(self):
         if self.pipeline_name == "atendimento":
@@ -48,9 +57,13 @@ class Pipeline:
             pipeline_solicitacoes = self.pipeline_solicitacoes_sao_lucas()
             if pipeline_solicitacoes:
                 logger.info("SOLICITACOES SAO LUCAS PIPELINE RUN SUCESSFULY")
+        elif self.pipeline_name == "recibos":
+            pipeline_recibos = self.pipeline_recibos_sao_lucas()
+            if pipeline_recibos:
+                logger.info("RECIBOS SAO LUCAS PIPELINE RUN SUCESSFULY")
         else:
             logger.error(f"Pipeline_name not supported: {self.pipeline_name}")
 
 
 if __name__ == "__main__":
-    Pipeline(dt_base=202601, pipeline_name="solicitacao").run()
+    Pipeline(dt_base=202601, pipeline_name="recibos").run()
