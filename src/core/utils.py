@@ -1,5 +1,8 @@
+import os
+
 from datetime import datetime
 from typing import Dict
+from decimal import Decimal
 
 import pandas as pd
 
@@ -61,6 +64,10 @@ def format_type_data(df: pd.DataFrame, schema: Dict[str, Dict[str, str]]) -> pd.
             )
         elif properties["type"] == "integer":
             df[column] = pd.to_numeric(df[column], errors="coerce").astype("Int64")
+        elif properties["type"] == "decimal":
+            df[column] = df[column].apply(
+                lambda x: Decimal(str(x).replace(",", ".")) if pd.notnull(x) else None
+            )
         elif properties["type"] == "string":
             df[column] = df[column].str.strip().astype(str)
         elif properties["type"] == "boolean":
