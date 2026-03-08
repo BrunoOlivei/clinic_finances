@@ -91,8 +91,8 @@ class RecibosSaoLucasBronze:
         else:
             return invoice_data
 
-    def get_invoice_by_beneficiario_procedimento(
-        self, session: Session, cd_beneficiario: str, cd_procedimento: str
+    def get_invoice_by_beneficiario_procedimento_atendimento(
+        self, session: Session, cd_beneficiario: str, cd_procedimento: str, dt_atendimento: str
     ) -> RecibosBronzeModel | None:
         """
         Retrieve a RecibosSaoLucasBronze record from the database based on beneficiario and procedimento.
@@ -101,6 +101,7 @@ class RecibosSaoLucasBronze:
             session (Session): The database session to use for the query.
             cd_beneficiario (str): The beneficiario code to filter by
             cd_procedimento (str): The procedimento code to filter by.
+            dt_atendimento (str): The date of the atendimento to filter by.
         
         Returns:
             RecibosBronzeModel | None: The retrieved record if found, otherwise None.
@@ -108,21 +109,22 @@ class RecibosSaoLucasBronze:
         try:
             stmt = select(RecibosBronzeModel).where(
                 RecibosBronzeModel.cd_beneficiario == cd_beneficiario,
-                RecibosBronzeModel.cd_procedimento == cd_procedimento
+                RecibosBronzeModel.cd_procedimento == cd_procedimento,
+                RecibosBronzeModel.dt_atendimento == dt_atendimento
             )
             result = session.execute(stmt).scalar_one_or_none()
         except Exception as e:
             logger.error(
-                f"Error retrieving invoice by beneficiario and procedimento: {e} - Beneficiario: {cd_beneficiario}, Procedimento: {cd_procedimento}"
+                f"Error retrieving invoice by beneficiario and procedimento: {e} - Beneficiario: {cd_beneficiario}, Procedimento: {cd_procedimento}, Atendimento: {dt_atendimento}"
             )
         else:
             if result:
                 logger.info(
-                    f"Invoice retrieved successfully for beneficiario: {cd_beneficiario} and procedimento: {cd_beneficiario}"
+                    f"Invoice retrieved successfully for beneficiario: {cd_beneficiario} and procedimento: {cd_procedimento}, Atendimento: {dt_atendimento}"
                 )
             else:
                 logger.info(
-                    f"No invoice found for beneficiario: {cd_beneficiario} and procedimento: {cd_procedimento}"
+                    f"No invoice found for beneficiario: {cd_beneficiario}, procedimento: {cd_procedimento}, atendimento: {dt_atendimento}"
                 )
             return result
         
@@ -137,8 +139,8 @@ class RecibosSaoLucasBronze:
                 invoice_data (ReciboSaoLucasBronzeSchema): The data to insert or update.
             """
             try:
-                existing_invoice = self.get_invoice_by_beneficiario_procedimento(
-                    session, invoice_data.cd_beneficiario, invoice_data.cd_procedimento
+                existing_invoice = self.get_invoice_by_beneficiario_procedimento_atendimento(
+                    session, invoice_data.cd_beneficiario, invoice_data.cd_procedimento, invoice_data.dt_atendimento
                 )
                 if existing_invoice:
                     for field, value in invoice_data.model_dump().items():
