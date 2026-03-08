@@ -4,7 +4,7 @@ import pandas as pd
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from src.core import ReadFile, db, logger, set_default_dt_base
+from src.core import ReadFile, db, logger, set_default_dt_base, move_file
 from src.models import SolicitacoesSaoLucasBronze as SolicitacoesBronzeModel
 from src.schemas import SolicitacoesSaoLucasBronzeSchema
 
@@ -194,27 +194,10 @@ class SolicitacoesSaoLucasBronze:
             )
             raise
 
-    def move_file(self) -> None:
-        """
-        Move the processed file from the landzone directory to the processed directory.
-        """
-        try:
-            files = os.listdir(self.landzone_path)
-            for file in files:
-                if os.path.splitext(file.lower())[0] == self.file_name:
-                    source_file = os.path.join(self.landzone_path, file)
-                    destination_file = os.path.join(self.processed_path, file)
-                    os.rename(source_file, destination_file)
-                    logger.info(
-                        f"File moved successfully from {source_file} to {destination_file}"
-                    )
-        except Exception as e:
-            logger.error(
-                f"Error moving file from {source_file} to {destination_file}: {e}"
-            )
-            raise
-
     def main(self) -> bool:
+        """
+        Main method to run the solicitacoes sao lucas bronze import pipeline.
+        """
         logger.info("SOLICITACOES SAO LUCAS IMPORT")
         try:
             df = self.load_data()
@@ -237,7 +220,7 @@ class SolicitacoesSaoLucasBronze:
             logger.info(f"Total rows processed: {num_rows}")
             logger.info(f"Total affected rows: {affected_rows}")
 
-            self.move_file()
+            move_file(self.landzone_path, self.file_name, self.processed_path)
         except Exception as e:
             logger.error(f"Error in Solicitações Sao Lucas import pipeline: {e}")
             return False
