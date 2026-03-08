@@ -55,6 +55,15 @@ class SolicitacoesSaoLucasSilver:
         }
 
     def load_data(self, session: Session) -> pd.DataFrame:
+        """
+        Load unprocessed records from the bronze table.
+
+        Args:
+            session (Session): The database session to use for the query.
+        
+        Returns:
+            pd.DataFrame: The DataFrame containing the loaded data.
+        """
         try:
             stmt = select(SolicitacoesBronzeModel).where(
                 SolicitacoesBronzeModel.file_name == self.file_name,
@@ -71,6 +80,15 @@ class SolicitacoesSaoLucasSilver:
             return df
 
     def creat_claim_data(self, row: pd.Series) -> SolicitacoesSaoLucasSilverSchema:
+        """
+        Create an SolicitacoesSaoLucasSilverSchema object from a row of the DataFrame.
+
+        Args:
+            row (pd.Series): A row from the DataFrame.
+
+        Returns:
+            SolicitacoesSaoLucasSilverSchema: The created schema object.
+        """
         try:
             claim_data = SolicitacoesSaoLucasSilverSchema(
                 nr_solicitacao=row["solicitacao"],
@@ -131,7 +149,17 @@ class SolicitacoesSaoLucasSilver:
     def get_claim_by_solicitacao_procedimento(
         self, session: Session, nr_solicitacao: int, cd_procedimento: str
     ) -> SolicitacoesSilverModel | None:
+        """
+        Retrieve an SolicitacoesSilverModel record from the database based on nr_solicitacao and cd_procedimento.
 
+        Args:
+            session (Session): The database session to use for the query.
+            nr_solicitacao (int): The solicitacao value to filter by.
+            cd_procedimento (str): The procedimento value to filter by.
+
+        Returns:
+            SolicitacoesSilverModel | None: The retrieved record if found, otherwise None.
+        """
         try:
             stmt = select(SolicitacoesSilverModel).where(
                 SolicitacoesSilverModel.nr_solicitacao == nr_solicitacao,
@@ -157,7 +185,13 @@ class SolicitacoesSaoLucasSilver:
     def insert_or_update_claims(
         self, session: Session, claim_data: SolicitacoesSaoLucasSilverSchema
     ) -> None:
+        """
+        Insert or update SolicitacoesSaoLucasSilver records in the session (without committing).
 
+        Args:
+            session (Session): The database session to use for the operation.
+            claim_data (SolicitacoesSaoLucasSilverSchema): The data to insert or update.
+        """
         try:
             existing_claim = self.get_claim_by_solicitacao_procedimento(
                 session, claim_data.nr_solicitacao, claim_data.cd_procedimento
@@ -180,6 +214,9 @@ class SolicitacoesSaoLucasSilver:
             raise
 
     def main(self) -> bool:
+        """
+        Main methos to run the recibos sao lucas silver import pipeline
+        """
         logger.info("SOLICITACOES SAO LUCAS SILVER IMPORT")
         try:
             with next(db.get_session()) as session:
