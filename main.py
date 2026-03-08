@@ -98,4 +98,4 @@ class Pipeline:
 
 
 if __name__ == "__main__":
-    Pipeline(dt_base=202602, pipeline_name="atendimento").run()
+    Pipeline(dt_base=None, pipeline_name=None).run()
