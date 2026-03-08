@@ -7,6 +7,7 @@ from src.services import (
     SolicitacoesSaoLucasBronze,
     SolicitacoesSaoLucasSilver,
     RecibosSaoLucasBronze,
+    RecibosSaoLucasSilver,
 )
 
 
@@ -33,7 +34,11 @@ class Pipeline:
 
     def pipeline_recibos_sao_lucas(self) -> bool:
         bronze_finished = RecibosSaoLucasBronze(dt_base=self.dt_base).main()
-        return bronze_finished
+        if bronze_finished:
+            silver_finished = RecibosSaoLucasSilver(dt_base=self.dt_base).main()
+            return silver_finished
+        else:
+            return False
 
     def run_all_pipelines(self):
         pipeline_atendimento = self.pipeline_atendimento_sao_lucas()
@@ -66,4 +71,4 @@ class Pipeline:
 
 
 if __name__ == "__main__":
-    Pipeline(dt_base=202601, pipeline_name="recibos").run()
+    Pipeline(dt_base=202602, pipeline_name="solicitacao").run()

@@ -1,8 +1,9 @@
 from src.schemas.atendimentos_sao_lucas_bronze import AtendimentoSaoLucasBronzeSchema
 from src.schemas.atendimentos_sao_lucas_silver import AtendimentoSaoLucasSilverSchema
+from src.schemas.recibos_sao_lucas_bronze import ReciboSaoLucasBronzeSchema
+from src.schemas.recibos_sao_lucas_silver import ReciboSaoLucasSilverSchema
 from src.schemas.solicitacoes_sao_lucas_bronze import SolicitacoesSaoLucasBronzeSchema
 from src.schemas.solicitacoes_sao_lucas_silver import SolicitacoesSaoLucasSilverSchema
-from src.schemas.recibos_sao_lucas_bronze import ReciboSaoLucasBronzeSchema
 
 __all__ = [
     "AtendimentoSaoLucasBronzeSchema",
@@ -10,4 +11,5 @@ __all__ = [
     "SolicitacoesSaoLucasBronzeSchema",
     "SolicitacoesSaoLucasSilverSchema",
     "ReciboSaoLucasBronzeSchema",
+    "ReciboSaoLucasSilverSchema",
 ]
