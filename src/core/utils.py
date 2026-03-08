@@ -73,3 +73,29 @@ def format_type_data(df: pd.DataFrame, schema: Dict[str, Dict[str, str]]) -> pd.
             )
             
     return df
+
+
+def move_file(landzone_path: str, file_name: str, processed_path: str) -> None:
+    """
+    Move the processed file from the landzone directory to the processed directory.
+
+    Args:
+        landzone_path (str): The origin path of the file.
+        file_name (str): The file name.
+        processed_path (str): The destination path of the file.
+    """
+    try:
+        files = os.listdir(landzone_path)
+        for file in files:
+            if os.path.splitext(file.lower())[0] == file_name:
+                source_file = os.path.join(landzone_path, file)
+                destination_file = os.path.join(processed_path, file)
+                os.rename(source_file, destination_file)
+                logger.info(
+                    f"File moved successfully from {source_file} to {destination_file}"
+                )
+    except Exception as e:
+        logger.error(
+            f"Error moving file from {source_file} to {destination_file}: {e}"
+        )
+        raise
